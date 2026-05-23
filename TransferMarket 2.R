@@ -192,3 +192,210 @@ modelo_final <- lm(
   
   data = data_filtrada
 )
+
+# =========================================================
+# RESULTADOS MODELO
+# =========================================================
+
+summary(modelo_final)
+
+# =========================================================
+# R2 AJUSTADO
+# =========================================================
+
+summary(modelo_final)$adj.r.squared
+
+# =========================================================
+# MULTICOLINEALIDAD
+# =========================================================
+
+vif(modelo_final)
+
+# =========================================================
+# HETEROCEDASTICIDAD
+# =========================================================
+
+bptest(modelo_final)
+
+# =========================================================
+# RESET TEST
+# =========================================================
+
+resettest(modelo_final)
+
+# =========================================================
+# ERRORES ROBUSTOS
+# =========================================================
+
+coeftest(
+  
+  modelo_final,
+  
+  vcov = vcovHC(
+    modelo_final,
+    type = "HC1"
+  )
+)
+
+# =========================================================
+# PREDICCIONES
+# =========================================================
+
+pred <- predict(modelo_final)
+
+# =========================================================
+# RMSE
+# =========================================================
+
+rmse_valor <- rmse(
+  
+  data_filtrada$ln_ValorMercado,
+  pred
+)
+
+rmse_valor
+
+# =========================================================
+# MAE
+# =========================================================
+
+mae_valor <- mae(
+  
+  data_filtrada$ln_ValorMercado,
+  pred
+)
+
+mae_valor
+
+# =========================================================
+# HISTOGRAMA RESIDUOS
+# =========================================================
+
+hist(
+  
+  residuals(modelo_final),
+  
+  main = "Histograma de Residuos",
+  
+  xlab = "Residuos",
+  
+  col = "lightgray"
+)
+
+# =========================================================
+# RESIDUOS VS AJUSTADOS
+# =========================================================
+
+plot(
+  
+  modelo_final$fitted.values,
+  
+  residuals(modelo_final),
+  
+  xlab = "Valores Ajustados",
+  
+  ylab = "Residuos",
+  
+  main = "Residuos vs Ajustados",
+  
+  pch = 19
+)
+
+abline(
+  h = 0,
+  col = "red"
+)
+
+# =========================================================
+# VALORES REALES VS PREDICHOS
+# =========================================================
+
+plot(
+  
+  data_filtrada$ln_ValorMercado,
+  
+  pred,
+  
+  xlab = "Valores Reales",
+  
+  ylab = "Valores Predichos",
+  
+  main = "Valores Reales vs Predichos",
+  
+  pch = 19
+)
+
+abline(
+  0,
+  1,
+  col = "blue"
+)
+
+# =========================================================
+# NORMALIDAD RESIDUOS
+# =========================================================
+
+shapiro.test(
+  
+  residuals(modelo_final)
+)
+
+# =========================================================
+# MATRIZ CORRELACIÓN
+# =========================================================
+
+cor(
+  
+  data_filtrada %>%
+    
+    select(
+      
+      `Valor de mercado`,
+      
+      Part_Ofensiva,
+      
+      Edad_centrada,
+      
+      Puntos_Ranking_FIFA
+      
+    ),
+  
+  use = "complete.obs"
+)
+
+# =========================================================
+# EXPORTAR RESULTADOS HTML
+# =========================================================
+
+stargazer(
+  
+  modelo_final,
+  
+  type = "html",
+  
+  title = "Modelo Predictivo Valor de Mercado",
+  
+  dep.var.labels = "Log Valor Mercado",
+  
+  out = "Resultados_Modelo_Final.html"
+)
+
+# =========================================================
+# EXPORTAR CSV PREDICCIONES
+# =========================================================
+
+data_filtrada$Predicciones <- pred
+
+write.csv(
+  
+  data_filtrada,
+  
+  "Predicciones_Jugadores.csv",
+  
+  row.names = FALSE
+)
+
+# =========================================================
+# FIN
+# =========================================================
+
