@@ -107,3 +107,88 @@ data$Part_Ofensiva2 <- (
 # =========================================================
 
 data <- na.omit(data)
+
+
+# =========================================================
+# REVISIÓN GENERAL
+# =========================================================
+
+summary(data)
+
+str(data)
+
+# =========================================================
+# FILTRO FINAL
+# =========================================================
+
+data_filtrada <- data %>%
+  
+  filter(
+    
+    `Valor de mercado` > 32000000,
+    
+    `Perfil Ofensivo` %in%
+      
+      c(
+        "Delantero centro",
+        "Extremo derecho",
+        "Extremo izquierdo"
+      )
+  )
+
+# =========================================================
+# CENTRAR EDAD
+# =========================================================
+
+data_filtrada$Edad_centrada <- 
+  
+  data_filtrada$Edad -
+  
+  mean(data_filtrada$Edad)
+
+# Edad centrada al cuadrado
+data_filtrada$Edad_centrada2 <- 
+  
+  data_filtrada$Edad_centrada^2
+
+# =========================================================
+# REVISAR MUESTRA FINAL
+# =========================================================
+
+table(
+  data_filtrada$`Perfil Ofensivo`
+)
+
+nrow(data_filtrada)
+
+# =========================================================
+# MODELO PREDICTIVO FINAL
+# =========================================================
+
+modelo_final <- lm(
+  
+  ln_ValorMercado ~
+    
+    Part_Ofensiva +
+    
+    Edad_centrada +
+    Edad_centrada2 +
+    
+    `Perfil Ofensivo` +
+    
+    ClubTop +
+    
+    Liga +
+    
+    Puntos_Ranking_FIFA +
+    
+    Seleccion_Nacional +
+    
+    Comp_Internacional +
+    
+    Popularidad_Alta +
+    
+    Popularidad_Alta:Comp_Internacional,
+  
+  data = data_filtrada
+)
